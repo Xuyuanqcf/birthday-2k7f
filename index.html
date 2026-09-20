@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fdf7ee">
+<meta name="format-detection" content="telephone=no">
+<!-- 手机加到桌面时用的图标（内置一个蛋糕 emoji，不需要额外图片文件） -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23fdf7ee'/%3E%3Ctext x='90' y='128' font-size='104' text-anchor='middle'%3E%F0%9F%8E%82%3C/text%3E%3C/svg%3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="生日快乐">
+<title>祝爸爸妈妈生日快乐</title>
+
+<!-- ============================================================
+     给爸爸妈妈的生日祝福 · 点击翻页版
+     共三页：标题 → 信 → 吹蜡烛许愿
+     - 点屏幕任意位置翻到下一页
+     - 键盘 ← → 或空格也能翻
+     - 背景音乐循环播放，右上角可开关
+     要改内容：往下面找「可修改配置」那一段
+     ============================================================ -->
+
+<style>
+  :root{
+    --纸:      #fdf7ee;
+    --纸深:    #f4e4d0;
+    --玫瑰:    #c96f52;
+    --玫瑰浅:  #e5a186;
+    --金:      #c9922e;
+    --墨:      #4a3728;
+    --墨浅:    #8b7663;
+    --烛光:    #ffb347;
+    --圆角:    22px;
+    --衬线: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", serif;
+    --黑体: "PingFang SC", "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", system-ui, sans-serif;
+  }
+
+  *{ box-sizing: border-box; }
+  html, body{ margin:0; height:100%; overflow:hidden; }
+  body{
+    background:
+      radial-gradient(120% 90% at 50% 0%, #fffaf3 0%, #f8e9d8 45%, #efd8bf 100%);
+    color: var(--墨);
+    font-family: var(--黑体);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;   /* 手机上点得快一点，也不会双击缩放 */
+  }
+
+  /* 背景上飘的暖色光点 */
+  .光点层{ position:fixed; inset:0; pointer-events:none; z-index:0; }
+  .光点{
+    position:absolute; border-radius:50%;
+    background: radial-gradient(circle, rgba(255,214,150,.9), rgba(255,214,150,0) 70%);
+    animation: 飘 9s ease-in-out infinite;
+  }
+  @keyframes 飘{
+    0%,100%{ transform: translateY(0) scale(1); opacity:.35; }
+    50%    { transform: translateY(-18px) scale(1.15); opacity:.75; }
+  }
+
+  /* 烟花 / 彩纸 */
+  #烟花层{ position:fixed; inset:0; z-index:30; pointer-events:none; width:100%; height:100%; }
+
+  /* ---------- 翻页书架 ---------- */
+  .书{ position:fixed; inset:0; perspective: 1500px; z-index:1; }
+
+  .页{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding: clamp(28px, 7vh, 80px) clamp(20px, 6vw, 64px);
+    opacity:0;
+    transform: rotateY(-15deg) translateX(6%) scale(.95);
+    transform-origin: right center;
+    transition: opacity .6s ease, transform .8s cubic-bezier(.4,.05,.2,1);
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .页.当前{
+    opacity:1; transform:none; pointer-events:auto; z-index:3;
+    transform-origin: center center;
+  }
+  .页.过去{
+    opacity:0; transform: rotateY(15deg) translateX(-6%) scale(.95);
+    transform-origin: left center;
+  }
+
+  /* 纸张卡片：整页的内容都放在这张纸上 */
+  .纸{
+    position:relative;
+    width: min(860px, 100%);
+    max-height: 100%;
+    padding: clamp(30px, 6vw, 64px) clamp(26px, 6vw, 68px);
+    border-radius: var(--圆角);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,252,247,.55)),
+      var(--纸);
+    box-shadow:
+      0 2px 0 rgba(255,255,255,.8) inset,
+      0 26px 60px rgba(120, 84, 54, .16),
+      0 4px 14px rgba(120, 84, 54, .08);
+    border: 1px solid rgba(201, 146, 46, .18);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    overflow: auto;
+  }
+  .纸::before{
+    content:""; position:absolute; inset:9px; border-radius: calc(var(--圆角) - 8px);
+    border: 1px solid rgba(201,146,46,.22); pointer-events:none;
+  }
+
+  /* ---------- 第一页 ---------- */
+  .小字{
+    letter-spacing: 8px; font-size: 13px; color: var(--玫瑰);
+    margin: 0 0 clamp(14px, 3vh, 26px); text-indent: 8px;
+  }
+  .主标题{
+    font-family: var(--衬线); font-weight: 700;
+    font-size: clamp(34px, 8.4vw, 76px);
+    line-height: 1.3; letter-spacing: 4px; text-align: center;
+    margin: 0; color: var(--墨);
+    text-shadow: 0 2px 0 rgba(255,255,255,.7);
+  }
+  .标题下划线{ width: min(420px, 76%); margin: clamp(10px,2vh,20px) 0 0; }
+  .标题下划线 path{
+    fill:none; stroke: var(--玫瑰); stroke-width: 3.2; stroke-linecap: round;
+    stroke-dasharray: 900; stroke-dashoffset: 0;   /* 默认就是画好的 */
+    opacity:.85;
+  }
+  /* 还没触发时先藏起来；动画跑完停在第 0 偏移。
+     这样即使动画没跑（比如某些环境禁用了动画），下划线也照样看得见 */
+  .标题下划线:not(.画完) path{ stroke-dashoffset: 900; }
+  .标题下划线.画完 path{ animation: 画笔迹 1.6s ease .4s forwards; }
+  @keyframes 画笔迹{ from{ stroke-dashoffset: 900; } to{ stroke-dashoffset: 0; } }
+  .副标题{
+    margin: clamp(20px, 4vh, 34px) 0 0; max-width: 560px;
+    font-family: var(--衬线); font-size: clamp(15px, 3.6vw, 19px);
+    line-height: 2; letter-spacing: 1.5px; color: var(--墨浅); text-align: center;
+  }
+
+  /* ---------- 第二页：信 ---------- */
+  .信纸{
+    width: min(680px, 100%);
+    font-family: var(--衬线); color: #4a3728;
+  }
+  .信纸 h2{
+    font-size: clamp(19px, 4vw, 24px); letter-spacing: 8px; font-weight: 600;
+    color: var(--玫瑰); text-align: center; margin: 0 0 clamp(18px,3vh,30px);
+  }
+  .信纸 p{
+    font-size: clamp(15px, 3.7vw, 17.5px); line-height: 2.3;
+    letter-spacing: .8px; margin: 0 0 1.05em; text-align: justify;
+    opacity:0; transform: translateY(10px);
+    transition: opacity .9s ease, transform .9s ease;
+  }
+  .信纸 p.显示{ opacity:1; transform:none; }
+  .信纸 .落款{ text-align: right; color: var(--墨浅); margin-top: 1.6em; }
+
+  /* ---------- 第三页：蛋糕 ---------- */
+  .蛋糕台{ position: relative; display:inline-block; }
+  .蛋糕{ position: relative; width: 260px; margin: 0 auto; }
+  .蜡烛层{ display:flex; justify-content:center; gap:32px; height:70px; align-items:flex-end; }
+  .蜡烛{
+    position:relative; width:11px; height:48px; border-radius:4px;
+    background: repeating-linear-gradient(45deg, #fff 0 6px, var(--玫瑰浅) 6px 12px);
+    box-shadow: inset -2px 0 3px rgba(0,0,0,.12);
+  }
+  .烛芯{ position:absolute; left:50%; top:-6px; width:2px; height:6px; margin-left:-1px; background:#5b4632; border-radius:1px; }
+  .火焰{
+    position:absolute; left:50%; top:-28px; width:15px; height:24px; margin-left:-7.5px;
+    border-radius:50% 50% 45% 45%;
+    background: radial-gradient(circle at 50% 70%, #fffbe6 0%, var(--烛光) 45%, #ff7a2f 80%, transparent 100%);
+    box-shadow: 0 0 22px 7px rgba(255,170,70,.45);
+    transform-origin: 50% 100%;
+    animation: 摇曳 .28s ease-in-out infinite alternate;
+    transition: opacity .45s ease, transform .45s ease;
+  }
+  @keyframes 摇曳{
+    from{ transform: scale(1,1) rotate(-3deg); }
+    to{   transform: scale(1.06,.94) rotate(4deg); }
+  }
+  .蜡烛.灭 .火焰{ opacity:0; transform: scale(.2,.5) translateY(6px); }
+  .烟雾{
+    position:absolute; left:50%; top:-32px; width:8px; height:8px; margin-left:-4px;
+    background: rgba(180,175,170,.55); border-radius:50%; opacity:0; pointer-events:none;
+  }
+  .蜡烛.灭 .烟雾{ animation: 升烟 2.2s ease-out .15s forwards; }
+  @keyframes 升烟{
+    0%{ opacity:.75; transform: translateY(0) scale(.6); }
+    100%{ opacity:0; transform: translateY(-70px) scale(2.4); }
+  }
+  .层{ position:relative; margin:0 auto; }
+  .层1{ width:186px; height:50px; background: linear-gradient(180deg,#f7d9a8,#e8b878); border-radius:8px 8px 6px 6px; }
+  .层2{ width:228px; height:56px; background: linear-gradient(180deg,#fbe3bd,#e2ac6c); border-radius:8px 8px 6px 6px; }
+  .层3{ width:260px; height:62px; background: linear-gradient(180deg,#f7d9a8,#dda361); border-radius:10px 10px 14px 14px; }
+  .花边{
+    position:absolute; left:0; right:0; top:-9px; height:18px;
+    background: radial-gradient(circle at 9px 9px, #fffdf8 9px, transparent 10px) repeat-x;
+    background-size: 18px 18px;
+  }
+  .樱桃{
+    position:absolute; width:15px; height:15px; border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, #ef8fa8, #cc3f5e);
+    box-shadow: 0 2px 4px rgba(0,0,0,.15);
+  }
+  .樱桃::after{
+    content:""; position:absolute; left:7px; top:-6px; width:2px; height:7px;
+    background:#6b9a52; border-radius:1px; transform: rotate(12deg);
+  }
+  .碟子{
+    width:300px; height:15px; margin:-4px auto 0; border-radius:50%;
+    background: linear-gradient(180deg,#f0e6da,#d6c2ab);
+    box-shadow: 0 14px 26px rgba(120,84,54,.22);
+  }
+
+  .大按钮{
+    appearance:none; border:0; cursor:pointer;
+    padding: 14px 38px; border-radius: 999px;
+    font-family: var(--黑体); font-size: 16px; font-weight: 600; letter-spacing: 1px;
+    color: #fff8f0;
+    background: linear-gradient(135deg, #d98a6b, #c96f52);
+    box-shadow: 0 10px 26px rgba(201,111,82,.32), inset 0 1px 0 rgba(255,255,255,.35);
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .大按钮:hover{ transform: translateY(-2px); box-shadow: 0 14px 32px rgba(201,111,82,.4); }
+  .大按钮:active{ transform: scale(.97); }
+  .大按钮[disabled]{ filter: grayscale(.5); opacity:.75; cursor: default; }
+  .次要按钮{
+    background: transparent; color: var(--玫瑰);
+    border: 1px solid rgba(201,111,82,.45); box-shadow:none;
+    font-weight: 500; font-size: 15px; padding: 12px 28px;
+  }
+  .次要按钮:hover{ background: rgba(201,111,82,.08); box-shadow:none; }
+
+  .吹气区{ margin-top: 18px; display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .吹气提示{ text-align:center; color: var(--墨浅); font-size:14px; line-height:1.9; margin:0; }
+  .能量条{ width:200px; height:8px; border-radius:99px; background: rgba(120,84,54,.14); overflow:hidden; }
+  .能量条内{
+    display:block; height:100%; width:0%; border-radius:99px;
+    background: linear-gradient(90deg, #e8b06a, var(--玫瑰));
+    transition: width .07s linear;
+  }
+  .麦克风提示{ margin: 12px auto 0; max-width: 400px; font-size:13px; line-height:1.9; color: var(--墨浅); text-align:center; }
+  .麦克风提示 b{ color: var(--玫瑰); font-weight:600; }
+
+  .许愿{
+    margin: clamp(18px,3vh,28px) 0 0; min-height: 2.4em; max-width: 520px;
+    font-family: var(--衬线); font-size: clamp(16px, 4vw, 21px);
+    color: var(--玫瑰); letter-spacing: 2px; line-height: 1.9; text-align:center;
+    opacity:0; transform: translateY(10px);
+    transition: opacity .8s ease, transform .8s ease;
+  }
+  .许愿.显示{ opacity:1; transform:none; }
+  .结束语{
+    margin: 14px 0 0; font-family: var(--衬线); font-size: clamp(14px,3.4vw,16px);
+    color: var(--墨浅); letter-spacing:2px;
+    opacity:0; transition: opacity 1s ease .6s;
+  }
+  .结束语.显示{ opacity:1; }
+
+  /* ---------- 翻页提示 ---------- */
+  .翻页提示{
+    position: fixed; left: 50%; bottom: calc(clamp(14px, 3vh, 30px) + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    z-index: 20; pointer-events: none;
+    font-size: 13px; letter-spacing: 2px; color: rgba(139,118,99,.8);
+    animation: 呼吸 2.6s ease-in-out infinite;
+    transition: opacity .4s ease;
+  }
+  @keyframes 呼吸{ 0%,100%{ opacity:.45; } 50%{ opacity:1; } }
+  /* 关键：必须把动画停掉，否则 keyframes 里的 opacity 会盖住这条规则 */
+  .翻页提示.隐藏{ opacity:0; animation:none; }
+
+  /* 页码圆点 */
+  .页码{
+    position: fixed; left: 50%; bottom: calc(clamp(46px, 8vh, 66px) + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    z-index: 20; display: flex; gap: 9px;
+  }
+  .点{
+    width: 8px; height: 8px; border-radius: 50%; cursor: pointer;
+    background: rgba(201,111,82,.28); transition: all .3s ease;
+  }
+  .点.选中{ background: var(--玫瑰); transform: scale(1.35); }
+
+  /* 右上角音乐开关 */
+  #音乐按钮{
+    position: fixed; right: calc(16px + env(safe-area-inset-right)); top: calc(16px + env(safe-area-inset-top)); z-index: 40;
+    width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+    border: 1px solid rgba(201,111,82,.3); background: rgba(255,252,247,.85);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    color: var(--玫瑰); font-size: 19px; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(120,84,54,.12);
+    transition: transform .2s ease;
+  }
+  #音乐按钮:hover{ transform: scale(1.08); }
+  #音乐按钮.暂停中{ animation: 音乐呼吸 2.4s ease-in-out infinite; }
+  @keyframes 音乐呼吸{ 0%,100%{ box-shadow: 0 0 0 0 rgba(201,111,82,.45); } 50%{ box-shadow: 0 0 0 12px rgba(201,111,82,0); } }
+
+  @media (max-width: 560px){
+    .纸{ padding: 26px 20px 30px; }
+    .蛋糕{ transform: scale(.86); transform-origin: top center; }
+    .碟子{ width: 260px; }
+    .小字{ letter-spacing: 5px; }
+  }
+
+  /* 手机横屏（高度很矮）：留白收紧，别把信挤出去 */
+  @media (orientation: landscape) and (max-height: 520px){
+    .页{ padding: 12px 18px; }
+    .纸{ padding: 18px 22px; }
+    .页码{ bottom: calc(10px + env(safe-area-inset-bottom)); }
+    .翻页提示{ display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="光点层" id="光点层"></div>
+<canvas id="烟花层"></canvas>
+
+<button id="音乐按钮" class="暂停中" title="背景音乐开关" aria-label="背景音乐开关">♪</button>
+
+<div class="书" id="书">
+
+  <!-- ========== 第一页：标题 ========== -->
+  <section class="页 当前" id="页1">
+    <div class="纸">
+      <p class="小字" id="顶部小字"></p>
+      <h1 class="主标题" id="主标题"></h1>
+      <svg class="标题下划线" id="标题下划线" viewBox="0 0 600 30" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M10,20 C120,7 220,25 310,14 C400,3 500,20 590,10"/>
+      </svg>
+      <p class="副标题" id="副标题"></p>
+    </div>
+  </section>
+
+  <!-- ========== 第二页：信 ========== -->
+  <section class="页" id="页2">
+    <div class="纸">
+      <div class="信纸">
+        <h2 id="信标题"></h2>
+        <div id="信内容"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 第三页：吹蜡烛许愿 ========== -->
+  <section class="页" id="页3">
+    <div class="纸">
+      <div class="蛋糕台">
+        <div class="蛋糕" id="蛋糕">
+          <div class="蜡烛层" id="蜡烛层"></div>
+          <div class="层 层1"><div class="花边"></div></div>
+          <div class="层 层2"><div class="花边"></div></div>
+          <div class="层 层3"><div class="花边"></div></div>
+        </div>
+        <div class="碟子"></div>
+      </div>
+
+      <div style="margin-top:22px"><button class="大按钮" id="吹蜡烛">吹蜡烛 🎂</button></div>
+
+      <div class="吹气区">
+        <button class="大按钮 次要按钮" id="麦克风按钮">🎤 对着屏幕吹一口气</button>
+        <div class="吹气提示" id="吹气提示" hidden>
+          <p id="吹气文字" style="margin:0 0 10px">对准麦克风，用力吹一口气</p>
+          <div class="能量条"><i class="能量条内" id="能量条内"></i></div>
+        </div>
+        <p class="麦克风提示" id="麦克风提示" hidden></p>
+      </div>
+
+      <p class="许愿" id="许愿"></p>
+      <p class="结束语" id="结束语"></p>
+      <div id="重看区" style="margin-top:22px; display:none">
+        <button class="大按钮 次要按钮" id="重看按钮">再看一遍</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="页码" id="页码"></div>
+<div class="翻页提示" id="翻页提示">轻点屏幕继续 →</div>
+
+<audio id="音乐" loop preload="auto"></audio>
+
+<script>
+/* ============================================================
+   可修改配置：改这里就够了
+   ============================================================ */
+const 配置 = {
+  // 第一页
+  顶部小字: "致最爱的你们",
+  主标题: "祝爸爸妈妈生日快乐",
+  副标题: "愿你们身体健康，笑口常开，日子一天比一天甜。",
+
+  // 第二页：你写的那封信，一行一段
+  信标题: "写给你们",
+  信内容: [
+    "亲爱的爸爸妈妈：",
+    "（这里换成你自己写的那封信。每一行就是一段，想写多长都可以。）",
+    "谢谢你们把日子过得那么认真，也谢谢你们一直都在。",
+    "生日快乐，我最爱的爸爸妈妈。"
+  ],
+  落款: "—— 爱你们的孩子",
+
+  // 第三页
+  蜡烛根数: 2,
+  许愿词: "蜡烛吹灭啦，愿望会实现的 ✨",
+  结束语: "生日快乐，我最爱的爸爸妈妈",
+
+  // 背景音乐（循环播放）：默认用你做的生日歌（GarageBand 导出的那版）
+  音乐: "音乐/导出/生日歌-GarageBand.mp3",
+  音乐音量: 0.55
+};
+
+/* ============================================================
+   以下为实现，一般不用改
+   ============================================================ */
+
+const 元素 = (编号) => document.getElementById(编号);
+
+/* ---------- 1. 背景光点 ---------- */
+(function 铺光点(){
+  const 层 = 元素("光点层");
+  const 数量 = Math.min(26, Math.round(window.innerWidth * window.innerHeight / 46000));
+  let 片段 = "";
+  for (let i = 0; i < 数量; i++){
+    const 大小 = (Math.random() * 90 + 40).toFixed(0);
+    片段 += '<span class="光点" style="'
+      + 'left:' + (Math.random()*100).toFixed(2) + '%;'
+      + 'top:' + (Math.random()*100).toFixed(2) + '%;'
+      + 'width:' + 大小 + 'px;height:' + 大小 + 'px;'
+      + 'animation-delay:-' + (Math.random()*9).toFixed(2) + 's;'
+      + '"></span>';
+  }
+  层.innerHTML = 片段;
+})();
+
+/* ---------- 2. 文字内容 ---------- */
+元素("顶部小字").textContent = 配置.顶部小字;
+元素("主标题").textContent = 配置.主标题;
+元素("副标题").textContent = 配置.副标题;
+元素("信标题").textContent = 配置.信标题;
+元素("信内容").innerHTML =
+  配置.信内容.map((段) => "<p>" + 段 + "</p>").join("")
+  + '<p class="落款">' + 配置.落款 + "</p>";
+元素("结束语").textContent = 配置.结束语;
+
+/* ---------- 3. 蜡烛 + 蛋糕上的樱桃 ---------- */
+(function 生成蛋糕(){
+  const 层 = 元素("蜡烛层");
+  let 片段 = "";
+  for (let i = 0; i < 配置.蜡烛根数; i++){
+    片段 += '<div class="蜡烛"><span class="烛芯"></span><span class="火焰"></span><span class="烟雾"></span></div>';
+  }
+  层.innerHTML = 片段;
+
+  const 蛋糕 = 元素("蛋糕");
+  蛋糕.querySelectorAll(".层").forEach((当前层, 序号) => {
+    const 个数 = [3, 4, 5][序号] || 3;
+    const 高度 = 当前层.clientHeight || 56;
+    for (let i = 0; i < 个数; i++){
+      const 樱桃 = document.createElement("span");
+      樱桃.className = "樱桃";
+      樱桃.style.left = 'calc(' + ((i + .5) / 个数 * 100) + '% - 7px)';
+      樱桃.style.top = (高度 - 15) + "px";
+      当前层.appendChild(樱桃);
+    }
+  });
+})();
+
+/* ---------- 4. 烟花与彩纸 ---------- */
+const 画布 = 元素("烟花层");
+const 画笔 = 画布.getContext("2d");
+let 粒子们 = [];
+let 动画中 = false;
+
+function 调整画布(){
+  const 倍率 = Math.min(window.devicePixelRatio || 1, 2);
+  画布.width = window.innerWidth * 倍率;
+  画布.height = window.innerHeight * 倍率;
+  画笔.setTransform(倍率, 0, 0, 倍率, 0, 0);
+}
+调整画布();
+window.addEventListener("resize", 调整画布);
+
+// 暖色系：金、玫瑰、橘、奶油
+const 颜色表 = ["#f0b95a","#e08a6b","#f7d9a8","#c96f52","#ffd98e","#ef8fa8","#fff3dc"];
+
+function 放烟花(x, y, 数量){
+  数量 = 数量 || 70;
+  const 色1 = 颜色表[Math.floor(Math.random()*颜色表.length)];
+  const 色2 = 颜色表[Math.floor(Math.random()*颜色表.length)];
+  for (let i = 0; i < 数量; i++){
+    const 角度 = Math.random() * Math.PI * 2;
+    const 速度 = Math.random() * 5.2 + 1.6;
+    粒子们.push({
+      x: x, y: y,
+      vx: Math.cos(角度) * 速度, vy: Math.sin(角度) * 速度,
+      寿命: 1, 衰减: Math.random() * .012 + .006,
+      大小: Math.random() * 2.4 + .9,
+      色: Math.random() > .5 ? 色1 : 色2,
+      重力: .028
+    });
+  }
+  启动动画();
+}
+
+function 撒彩纸(){
+  for (let i = 0; i < 160; i++){
+    粒子们.push({
+      x: Math.random() * window.innerWidth,
+      y: -20 - Math.random() * window.innerHeight * .5,
+      vx: (Math.random() - .5) * 1.6, vy: Math.random() * 2 + 1.2,
+      寿命: 1, 衰减: .0012, 大小: Math.random() * 4 + 2,
+      色: 颜色表[Math.floor(Math.random()*颜色表.length)],
+      重力: .012, 方形: true,
+      旋转: Math.random() * Math.PI, 转速: (Math.random() - .5) * .2
+    });
+  }
+  启动动画();
+}
+
+function 启动动画(){
+  if (!动画中){ 动画中 = true; requestAnimationFrame(逐帧); }
+}
+
+function 逐帧(){
+  画笔.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  粒子们 = 粒子们.filter(p => {
+    p.x += p.vx; p.y += p.vy;
+    p.vy += p.重力;
+    p.vx *= .992; p.vy *= .992;
+    p.寿命 -= p.衰减;
+    if (p.寿命 <= 0 || p.y > window.innerHeight + 60) return false;
+    画笔.globalAlpha = Math.max(0, Math.min(1, p.寿命));
+    画笔.fillStyle = p.色;
+    if (p.方形){
+      p.旋转 += p.转速;
+      画笔.save();
+      画笔.translate(p.x, p.y); 画笔.rotate(p.旋转);
+      画笔.fillRect(-p.大小/2, -p.大小, p.大小, p.大小 * 1.6);
+      画笔.restore();
+    } else {
+      画笔.beginPath(); 画笔.arc(p.x, p.y, p.大小, 0, Math.PI * 2); 画笔.fill();
+    }
+    return true;
+  });
+  画笔.globalAlpha = 1;
+  if (粒子们.length){ requestAnimationFrame(逐帧); }
+  else { 动画中 = false; }
+}
+
+/* ---------- 5. 背景音乐（循环） ---------- */
+const 音乐 = 元素("音乐");
+const 音乐按钮 = 元素("音乐按钮");
+音乐.src = 配置.音乐;
+音乐.volume = 配置.音乐音量;
+音乐.loop = true;
+
+function 播放音乐(){
+  const 结果 = 音乐.play();
+  if (结果 && 结果.catch){
+    结果.then(() => 音乐按钮.classList.remove("暂停中")).catch(() => {});
+  }
+}
+音乐按钮.addEventListener("click", (事件) => {
+  事件.stopPropagation();
+  if (音乐.paused){ 播放音乐(); } else { 音乐.pause(); }
+});
+音乐.addEventListener("play",  () => 音乐按钮.classList.remove("暂停中"));
+音乐.addEventListener("pause", () => 音乐按钮.classList.add("暂停中"));
+// 有些浏览器允许自动播放，能放就放
+window.addEventListener("load", () => { 音乐.play().then(() => 音乐按钮.classList.remove("暂停中")).catch(() => {}); });
+
+/* ---------- 6. 翻页 ---------- */
+const 页们 = [元素("页1"), 元素("页2"), 元素("页3")];   // 原来的插画页已去掉，现在是三页
+let 当前页 = 0;
+let 翻页中 = false;
+let 已开始 = false;      // 用户是否已经有过第一次交互（浏览器要求先交互才能放声音）
+
+// 页码圆点
+元素("页码").innerHTML = 页们.map((_, i) => '<span class="点" data-页="' + i + '"></span>').join("");
+const 点们 = Array.from(document.querySelectorAll(".点"));
+
+function 显示页(号, 方向){
+  if (号 < 0 || 号 >= 页们.length || 号 === 当前页) return;
+  const 旧 = 页们[当前页];
+  const 新 = 页们[号];
+  const 往前 = 号 > 当前页;
+
+  // 新页先摆到正确的起始位置
+  新.style.transition = "none";
+  新.classList.remove("当前", "过去");
+  新.style.transform = 往前 ? "rotateY(-15deg) translateX(6%) scale(.95)" : "rotateY(15deg) translateX(-6%) scale(.95)";
+  新.style.opacity = "0";
+  void 新.offsetWidth;            // 强制重排，让上面的初始状态生效
+  新.style.transition = "";
+  // 注意：这几个内联样式必须清掉，否则会盖住 .当前 的类样式，页面会一直全透明
+  新.style.transform = "";
+  新.style.opacity = "";
+
+  // 旧页转走，新页转进来
+  旧.classList.remove("当前");
+  旧.classList.add("过去");
+  新.classList.add("当前");
+
+  当前页 = 号;
+  翻页中 = true;
+  setTimeout(() => { 翻页中 = false; }, 700);
+
+  点们.forEach((d, i) => d.classList.toggle("选中", i === 号));
+  元素("翻页提示").classList.toggle("隐藏", 号 === 页们.length - 1);
+  离开一页(号);
+}
+
+function 下一页(){ 显示页(当前页 + 1); }
+function 上一页(){ 显示页(当前页 - 1); }
+
+// 点屏幕翻页（点按钮、链接、圆点不算）
+document.addEventListener("click", (事件) => {
+  if (事件.target.closest("button, a, .点, #音乐按钮")) return;
+  if (翻页中) return;
+  if (当前页 === 页们.length - 1) return;   // 最后一页留着吹蜡烛
+  if (!音乐.paused || 已开始) 下一页();
+  else { 已开始 = true; 播放音乐(); setTimeout(下一页, 260); }   // 第一次点击先起音乐
+});
+
+document.addEventListener("keydown", (事件) => {
+  if (事件.key === "ArrowRight" || 事件.key === " " || 事件.key === "Enter"){ 事件.preventDefault(); 下一页(); }
+  if (事件.key === "ArrowLeft"){ 事件.preventDefault(); 上一页(); }
+});
+点们.forEach((d, i) => d.addEventListener("click", (事件) => {
+  事件.stopPropagation();
+  if (!音乐.paused || 已开始) 显示页(i); else { 已开始 = true; 播放音乐(); setTimeout(() => 显示页(i), 260); }
+}));
+
+// 进到某一页时触发的动画
+function 离开一页(号){
+  元素("标题下划线").classList.add("画完");   // 翻过标题页就把笔迹画完
+  if (号 === 1) 元素("信内容").querySelectorAll("p").forEach((段, i) => {
+    setTimeout(() => 段.classList.add("显示"), i * 260);
+  });
+}
+setTimeout(() => 元素("标题下划线").classList.add("画完"), 600);
+
+/* ---------- 7. 吹蜡烛 ---------- */
+function 吹灭蜡烛(){
+  const 蛋糕 = 元素("蛋糕");
+  if (蛋糕.classList.contains("已吹灭")) return;
+  蛋糕.classList.add("已吹灭");
+
+  // 一根一根地灭
+  元素("蜡烛层").querySelectorAll(".蜡烛").forEach((蜡烛, i) => {
+    setTimeout(() => 蜡烛.classList.add("灭"), i * 190);
+  });
+
+  const 按钮 = 元素("吹蜡烛");
+  按钮.disabled = true;
+  按钮.textContent = "愿望已许下 🕯️";
+  const 麦按钮 = 元素("麦克风按钮");
+  麦按钮.disabled = true;
+  麦按钮.textContent = "已经吹灭啦";
+  元素("吹气提示").hidden = true;
+
+  const 位置 = 蛋糕.getBoundingClientRect();
+  放烟花(位置.left + 位置.width / 2, 位置.top, 90);
+  撒彩纸();
+
+  let 第几次 = 0;
+  const 定时 = setInterval(() => {
+    放烟花(window.innerWidth * (.1 + Math.random() * .8),
+           window.innerHeight * (.12 + Math.random() * .35), 60);
+    if (++第几次 >= 5) clearInterval(定时);
+  }, 380);
+
+  setTimeout(() => {
+    const 许愿 = 元素("许愿");
+    许愿.textContent = 配置.许愿词;
+    许愿.classList.add("显示");
+  }, 500);
+  setTimeout(() => 元素("结束语").classList.add("显示"), 1500);
+  setTimeout(() => { 元素("重看区").style.display = "block"; }, 2600);
+}
+
+元素("吹蜡烛").addEventListener("click", (事件) => {
+  事件.stopPropagation();
+  吹灭蜡烛();
+});
+
+元素("重看按钮").addEventListener("click", (事件) => {
+  事件.stopPropagation();
+  // 回到第一页重新走一遍
+  元素("蜡烛层").querySelectorAll(".蜡烛").forEach(蜡烛 => 蜡烛.classList.remove("灭"));
+  元素("蛋糕").classList.remove("已吹灭");
+  const 按钮 = 元素("吹蜡烛");
+  按钮.disabled = false; 按钮.textContent = "吹蜡烛 🎂";
+  const 麦按钮 = 元素("麦克风按钮");
+  麦按钮.disabled = !可用麦克风;
+  麦按钮.textContent = 可用麦克风 ? "🎤 对着屏幕吹一口气" : "🎤 用嘴吹（需用启动器打开）";
+  元素("许愿").classList.remove("显示");
+  元素("结束语").classList.remove("显示");
+  元素("重看区").style.display = "none";
+  显示页(0);
+});
+
+/* ---------- 8. 用嘴吹灭蜡烛（麦克风） ---------- */
+const 麦克风按钮 = 元素("麦克风按钮");
+const 吹气提示 = 元素("吹气提示");
+const 吹气文字 = 元素("吹气文字");
+const 能量条内 = 元素("能量条内");
+const 麦克风提示 = 元素("麦克风提示");
+let 正在听 = false;
+
+// 浏览器只在 http:// 或 https:// 下才给麦克风权限，双击打开（file://）不行
+const 可用麦克风 =
+  location.protocol !== "file:" &&
+  !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+
+if (!可用麦克风){
+  麦克风按钮.disabled = true;
+  麦克风按钮.textContent = "🎤 用嘴吹（需用启动器打开）";
+  麦克风提示.hidden = false;
+  麦克风提示.innerHTML =
+    "想真的用嘴把蜡烛吹灭？双击文件夹里的 <b>启动网页.command</b> 重新打开就行。";
+}
+
+async function 开始吹气(){
+  if (正在听 || !可用麦克风) return;
+  if (元素("蛋糕").classList.contains("已吹灭")) return;
+
+  正在听 = true;
+  吹气提示.hidden = false;
+  吹气文字.textContent = "正在打开麦克风…";
+  能量条内.style.width = "0%";
+
+  let 麦克风流;
+  try{
+    麦克风流 = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation:false, noiseSuppression:false, autoGainControl:false }
+    });
+  }catch(错误){
+    正在听 = false;
+    吹气文字.textContent = "没能打开麦克风（权限被拒绝了）。点上面的按钮也能吹灭。";
+    setTimeout(() => { 吹气提示.hidden = true; }, 4000);
+    return;
+  }
+
+  const 麦克风上下文 = new (window.AudioContext || window.webkitAudioContext)();
+  const 源 = 麦克风上下文.createMediaStreamSource(麦克风流);
+  const 分析器 = 麦克风上下文.createAnalyser();
+  分析器.fftSize = 1024;
+  源.connect(分析器);
+  const 数据 = new Uint8Array(分析器.fftSize);
+
+  吹气文字.textContent = "对准麦克风，用力吹一口气";
+  const 开始时刻 = performance.now();
+  let 环境累计 = 0, 环境帧数 = 0, 连续超阈值 = 0;
+
+  function 收尾(){
+    正在听 = false;
+    麦克风流.getTracks().forEach(轨道 => 轨道.stop());
+    麦克风上下文.close();
+  }
+
+  function 循环(){
+    if (!正在听) return;
+    const 已过 = performance.now() - 开始时刻;
+
+    分析器.getByteTimeDomainData(数据);
+    let 平方和 = 0;
+    for (let i = 0; i < 数据.length; i++){
+      const 值 = (数据[i] - 128) / 128;
+      平方和 += 值 * 值;
+    }
+    const 强度 = Math.sqrt(平方和 / 数据.length);
+    能量条内.style.width = Math.min(100, 强度 * 320) + "%";
+
+    if (已过 < 450){
+      // 前 0.45 秒先量环境噪声，用来定阈值
+      环境累计 += 强度; 环境帧数++;
+    } else {
+      const 环境 = Math.max(0.01, 环境累计 / Math.max(1, 环境帧数));
+      const 阈值 = Math.max(0.05, 环境 * 2.6);
+      if (强度 > 阈值){ 连续超阈值++; }
+      else { 连续超阈值 = Math.max(0, 连续超阈值 - 2); }
+
+      if (连续超阈值 >= 14){
+        吹气文字.textContent = "呼——蜡烛灭啦 ✨";
+        收尾();
+        setTimeout(吹灭蜡烛, 260);
+        return;
+      }
+    }
+
+    if (已过 > 15000){
+      吹气文字.textContent = "没听到风声，再试一次，或者直接点上面的按钮～";
+      收尾();
+      setTimeout(() => { 吹气提示.hidden = true; }, 3500);
+      return;
+    }
+    requestAnimationFrame(循环);
+  }
+  requestAnimationFrame(循环);
+}
+
+麦克风按钮.addEventListener("click", (事件) => {
+  事件.stopPropagation();
+  开始吹气();
+});
+</script>
+</body>
+</html>
