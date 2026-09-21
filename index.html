@@ -102,9 +102,14 @@
       0 4px 14px rgba(120, 84, 54, .08);
     border: 1px solid rgba(201, 146, 46, .18);
     display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
+    align-items: center;
+    /* 原来是 justify-content:center——内容比卡片高时，顶部会被裁掉而且滚不回去（CSS 老坑）。
+       改成 flex-start + 两个自动外边距的占位：有空间时照样居中，没空间时自动贴顶。 */
+    justify-content: flex-start;
     overflow: auto;
+    -webkit-overflow-scrolling: touch;
   }
+  .纸::before, .纸::after{ content:""; flex: 0 0 auto; margin: auto; }
   .纸::before{
     content:""; position:absolute; inset:9px; border-radius: calc(var(--圆角) - 8px);
     border: 1px solid rgba(201,146,46,.22); pointer-events:none;
@@ -149,13 +154,16 @@
     color: var(--玫瑰); text-align: center; margin: 0 0 clamp(18px,3vh,30px);
   }
   .信纸 p{
-    font-size: clamp(15px, 3.7vw, 17.5px); line-height: 2.3;
-    letter-spacing: .8px; margin: 0 0 1.05em; text-align: justify;
+    font-size: clamp(15px, 3.7vw, 17.5px); line-height: 1.95;
+    letter-spacing: .8px; margin: 0 0 .8em; text-align: justify;
     opacity:0; transform: translateY(10px);
     transition: opacity .9s ease, transform .9s ease;
   }
   .信纸 p.显示{ opacity:1; transform:none; }
   .信纸 .落款{ text-align: right; color: var(--墨浅); margin-top: 1.6em; }
+
+  /* 信页的卡片留白收窄一点，让整封信（含落款）尽量一屏放得下，放不下时卡片内部可滚动 */
+  #页2 .纸{ padding: clamp(22px, 4vw, 40px) clamp(24px, 5vw, 56px); }
 
   /* ---------- 第三页：蛋糕 ---------- */
   .蛋糕台{ position: relative; display:inline-block; }
@@ -298,7 +306,8 @@
   @keyframes 音乐呼吸{ 0%,100%{ box-shadow: 0 0 0 0 rgba(201,111,82,.45); } 50%{ box-shadow: 0 0 0 12px rgba(201,111,82,0); } }
 
   @media (max-width: 560px){
-    .纸{ padding: 26px 20px 30px; }
+    .页{ padding: 18px 16px; }          /* 手机上少留点白，信能多露几行 */
+    .纸{ padding: 24px 20px 26px; }
     .蛋糕{ transform: scale(.86); transform-origin: top center; }
     .碟子{ width: 260px; }
     .小字{ letter-spacing: 5px; }
@@ -402,11 +411,19 @@ const 配置 = {
   信标题: "写给你们",
   信内容: [
     "亲爱的爸爸妈妈：",
-    "（这里换成你自己写的那封信。每一行就是一段，想写多长都可以。）",
-    "谢谢你们把日子过得那么认真，也谢谢你们一直都在。",
-    "生日快乐，我最爱的爸爸妈妈。"
+    "无论是今天，还是明天，祝你们生日快乐！",
+    "先说一下这个网站，是我这两天精心策划的一个项目。之前做过一版滑动的，但我觉得不太好，就直接删掉了。"
+      + "于是这一版呢，呈现出点击翻页的形式，并且整个音乐都是我自己做的。最后还加了一个小小的创意，"
+      + "等会儿记得点下面那个，对屏幕吹一口气。",
+    "18 年以来，你们两个的生日始终挨着，旁边也始终都有我的参与——不管是小时候还是长大，不管是在家还是在学校。"
+      + "但是这一次，是时隔好久没有人陪你们过生日了。包括可能以后上学、工作，都没有办法及时回去。"
+      + "也许下一次现场给你们一起过生日，要等到好久以后。所以你们两个一定要好好生活，好好做伴，"
+      + "让没有我的日子不那么孤单。以后的人生还有很长呢。",
+    "你们的大儿子在上海一切都很好，包括学习上、生活上、心态上。随着我年龄的增长，我已经有了较为成熟的"
+      + "自我认知和社会认知，并且已经为以后的日子做好了规划，所以不用太为我操心啦。",
+    "再次祝你们天天开心！"
   ],
-  落款: "—— 爱你们的孩子",
+  落款: "—— 你们的大儿子",
 
   // 第三页
   蜡烛根数: 2,
